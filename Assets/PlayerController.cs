@@ -41,13 +41,35 @@ public class PlayerController : MonoBehaviour {
 
 		AnimationHelper.UpdateAnimator (animator, velocity.magnitude, velocity.normalized);
 	}
-
+		
 	void OnTriggerEnter2D(Collider2D other) {
-		Vector2 towardsOther = other.attachedRigidbody.position - rigidBody2d.position;
-		RaycastHit2D impact = Physics2D.Raycast (rigidBody2d.position, towardsOther);
-		velocity = Vector3.Reflect (velocity, impact.normal);
-		velocity *= .3f;
+		if (other.CompareTag("Player")) {
+			HandlePlayerTriggerEnter(other);
+		}
+	}
+
+	void HandlePlayerTriggerEnter(Collider2D other) {
 		StartCoroutine(IgnoreInputForDuration());
+
+		// look how fast they're going, attempt to conserve momentum using m1 * v1 = m2 * v2; 
+
+		PlayerController otherPlayer = other.GetComponent<PlayerController>();
+		float otherMass = otherPlayer.isSliding ? 3 : 1;
+		float myMass = isSliding ? 3 : 1;
+		float impulseFactor = otherMass / myMass;
+
+		Vector2 towardsOther = other.attachedRigidbody.position - rigidBody2d.position;
+		if (velocity.sqrMagnitude < 1f) { // if small magnitude, just hack it
+			velocity = -towardsOther.normalized * .5f * impulseFactor;
+			return;
+		}
+
+		RaycastHit2D impact = Physics2D.Raycast (rigidBody2d.position, towardsOther);
+		velocity = Vector2.Reflect (velocity, impact.normal);
+
+		float adjustedVelocityMagnitude = otherPlayer.velocity.magnitude * impulseFactor;
+		adjustedVelocityMagnitude = Mathf.Max(adjustedVelocityMagnitude, .5f);
+		velocity = velocity.normalized * adjustedVelocityMagnitude;
 	}
 		
 	public void Fire1Down() {
@@ -77,7 +99,6 @@ public class PlayerController : MonoBehaviour {
 		}
 		isSliding = true;
 		animator.SetBool ("Sliding", true);
-//		rigidBody2d.MoveRotation(-60);
 		velocity *= 1.1f;
 	}
 
@@ -85,7 +106,6 @@ public class PlayerController : MonoBehaviour {
 		if (isSliding) {
 			animator.SetBool ("Sliding", false);
 			isSliding = false;
-//			rigidBody2d.MoveRotation (0);
 		}
 	}
 
