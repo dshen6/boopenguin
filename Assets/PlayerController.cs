@@ -8,18 +8,24 @@ public class PlayerController : MonoBehaviour {
 
 	public int PLAYER_ID = 1;
 	public Vector2 velocity;
+	public float zVelocity;
 	public float maxWalkSpeed;
 	public float maxSlideSpeed;
 	public float walkSpeed;
 	public float slideSpeed;
+	public float gravity;
 	public float friction = .94f;
 	public float slideFriction = .98f;
 	public bool isSliding;
 	private float ignoreInputMillisRemaining;
 	private float slideDurationMillisRemaining;
+	private float fallDurationMillis;
 
 	protected PlayerInput playerInput;
 	protected Rigidbody2D rigidBody2d;
+
+	private Vector3 UP = new Vector3(0,0,-1);
+	private Vector3 DOWN = new Vector3(0,0,1);
 
 	void Start () {
 		playerInput = GetComponent<PlayerInput>();
@@ -28,6 +34,36 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void Update () {
+		// Check to see if we're falling
+		RaycastHit hit;
+		Physics.Raycast (gameObject.transform.position + UP, DOWN, out hit);
+		if (hit.collider == null || !hit.collider.name.Equals("Iceberg")) {
+			if (fallDurationMillis == 0) {
+				Debug.Log("just fell");
+			}
+
+			if (fallDurationMillis > 2f) {
+				Debug.Log("respawn");
+				zVelocity = 0;
+				velocity = Vector2.zero;
+				rigidBody2d.MovePosition(Vector2.zero);
+				gameObject.transform.position = Vector3.zero;
+
+				fallDurationMillis = 0;
+				return;
+			}
+
+			// let it fall
+			zVelocity += gravity * Time.fixedDeltaTime;
+			gameObject.transform.position += new Vector3(0, 0, zVelocity * Time.fixedDeltaTime);
+
+			// but keep side momentum
+			rigidBody2d.MovePosition(rigidBody2d.position + velocity * Time.fixedDeltaTime);
+
+			fallDurationMillis += Time.fixedDeltaTime;
+			return;
+		}
+
 		if (ignoreInputMillisRemaining <= 0) {
 			if (playerInput.isAiming() && slideDurationMillisRemaining <= 0) {
 				stopSliding();
