@@ -11,6 +11,8 @@ public class PlayerInput : MonoBehaviour {
 	float horizontal;
 	float vertical;
 
+	private HashSet<string> pressedInputSet;
+
 	private string A_INPUT = "A_Keyboard_";
 	private string B_INPUT = "B_Keyboard_";
 	private string A_GAMEPAD = "A_";
@@ -24,6 +26,7 @@ public class PlayerInput : MonoBehaviour {
 
 	void Start () {
 		controller = GetComponent<PlayerController> ();
+		pressedInputSet = new HashSet<string>();
 
 		int playerId = controller.PLAYER_ID;
 		A_INPUT += playerId;
@@ -46,12 +49,30 @@ public class PlayerInput : MonoBehaviour {
 		aimVector.x = horizontal;
 		aimVector.y = vertical;
 
+		if (horizontal > 0) {
+			pressedInputSet.Add("Input Right");
+		} 
+		if (horizontal < 0) {
+			pressedInputSet.Add("Input Left");
+		}
+		if (vertical > 0) {
+			pressedInputSet.Add("Input Up");
+		}
+		if (vertical < 0) {
+			pressedInputSet.Add("Input Down");
+		}
+
 		if (Input.GetButtonDown (A_INPUT) || Input.GetButtonDown (A_GAMEPAD)) {
 			BroadcastMessage ("Fire1Down");
+			pressedInputSet.Add(A_INPUT);
 		}
 	}
 
 	public bool isAiming() {
 		return aimVector.sqrMagnitude > .1f;
+	}
+
+	public bool hasPressedAllButtons() {
+		return pressedInputSet.Count == 5;
 	}
 }
