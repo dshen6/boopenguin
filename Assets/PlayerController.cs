@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
 	public float slideFriction = .98f;
 	public bool isSliding;
 	private float ignoreInputMillisRemaining;
+	private float slideDurationMillisRemaining;
 
 	protected PlayerInput playerInput;
 	protected Rigidbody2D rigidBody2d;
@@ -25,7 +26,7 @@ public class PlayerController : MonoBehaviour {
 
 	void Update () {
 		if (ignoreInputMillisRemaining <= 0) {
-			if (playerInput.isAiming()) {
+			if (playerInput.isAiming() && slideDurationMillisRemaining <= 0) {
 				stopSliding();
 			}
 			velocity += (isSliding ? slideSpeed : walkSpeed) * playerInput.aimVector; 
@@ -58,10 +59,10 @@ public class PlayerController : MonoBehaviour {
 
 	IEnumerator Slide(float millis = 600) {
 		startSliding ();
-		ignoreInputMillisRemaining = Mathf.Max(ignoreInputMillisRemaining, millis);
-		while (ignoreInputMillisRemaining > 0) {
+		slideDurationMillisRemaining = millis;
+		while (slideDurationMillisRemaining > 0) {
 			yield return null;
-			ignoreInputMillisRemaining -= Time.deltaTime * 1000;
+			slideDurationMillisRemaining -= Time.deltaTime * 1000;
 		}
 	}
 
