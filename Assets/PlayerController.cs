@@ -37,7 +37,10 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D other) {
-		velocity *= -.3f;
+		Vector2 towardsOther = other.attachedRigidbody.position - rigidBody2d.position;
+		RaycastHit2D impact = Physics2D.Raycast (rigidBody2d.position, towardsOther);
+		velocity = Vector3.Reflect (velocity, impact.normal);
+		velocity *= .3f;
 		StartCoroutine(IgnoreInputForDuration());
 	}
 		
@@ -62,7 +65,7 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	private void startSliding (){
+	private void startSliding () {
 		if (isSliding) {
 			return;
 		}
