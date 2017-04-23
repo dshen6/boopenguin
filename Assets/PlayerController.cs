@@ -76,14 +76,16 @@ public class PlayerController : MonoBehaviour {
 			return;
 		}
 		isSliding = true;
-		rigidBody2d.MoveRotation(-60);
+		animator.SetBool ("Sliding", true);
+//		rigidBody2d.MoveRotation(-60);
 		velocity *= 1.1f;
 	}
 
 	private void stopSliding () {
 		if (isSliding) {
+			animator.SetBool ("Sliding", false);
 			isSliding = false;
-			rigidBody2d.MoveRotation (0);
+//			rigidBody2d.MoveRotation (0);
 		}
 	}
 
