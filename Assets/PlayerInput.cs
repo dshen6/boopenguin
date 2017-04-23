@@ -46,14 +46,8 @@ public class PlayerInput : MonoBehaviour {
 		aimVector.x = horizontal;
 		aimVector.y = vertical;
 
-		if (aimVector == Vector2.zero) {
-			if (isFacingRight) {
-				aimVector = Vector2.right;
-			}
-			else {
-				aimVector = -Vector2.right;
-			}
+		if (Input.GetButtonDown (A_INPUT) || Input.GetButtonDown (A_GAMEPAD)) {
+			BroadcastMessage ("Fire1Down");
 		}
-
 	}
 }
