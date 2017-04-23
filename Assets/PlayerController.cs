@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+	private Animator animator;
+
 	public int PLAYER_ID = 1;
 	public Vector2 velocity;
 	public float maxWalkSpeed;
@@ -21,6 +23,7 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
 		playerInput = GetComponent<PlayerInput>();
 		rigidBody2d = GetComponent<Rigidbody2D>();
+		animator = GetComponentInChildren<Animator> ();
 	}
 
 	void Update () {
@@ -34,6 +37,8 @@ public class PlayerController : MonoBehaviour {
 		velocity *= isSliding ? slideFriction : friction;
 
 		rigidBody2d.MovePosition(rigidBody2d.position + velocity * Time.fixedDeltaTime);
+
+		AnimationHelper.UpdateAnimator (animator, velocity.magnitude, velocity.normalized);
 	}
 
 	void OnTriggerEnter2D(Collider2D other) {
