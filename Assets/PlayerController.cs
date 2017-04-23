@@ -13,9 +13,7 @@ public class PlayerController : MonoBehaviour {
 	public float friction = .94f;
 	public float slideFriction = .98f;
 	public bool isSliding;
-	public bool isRebounding;
-	private float inputYieldMillisRemaining;
-	private float slideYieldMillisRemaining;
+	private float ignoreInputMillisRemaining;
 
 	protected PlayerInput playerInput;
 	protected Rigidbody2D rigidBody2d;
@@ -26,9 +24,8 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void Update () {
-		isRebounding = inputYieldMillisRemaining > 0;
-		if (!isRebounding) {
-			velocity += walkSpeed * playerInput.aimVector; 
+		if (ignoreInputMillisRemaining <= 0) {
+			velocity += (isSliding ? slideSpeed : walkSpeed) * playerInput.aimVector; 
 			velocity = Vector2.ClampMagnitude (velocity, isSliding ? maxSlideSpeed : maxWalkSpeed);
 		}
 		velocity *= isSliding ? slideFriction : friction;
@@ -46,22 +43,22 @@ public class PlayerController : MonoBehaviour {
 	}
 		
 	IEnumerator IgnoreInputForDuration(float millis = 300) {
-		inputYieldMillisRemaining = millis;
-		while (inputYieldMillisRemaining > 0) {
-			yield return new WaitForSeconds(.3f);
-			inputYieldMillisRemaining -= Time.deltaTime * 1000;
+		ignoreInputMillisRemaining = millis;
+		while (ignoreInputMillisRemaining > 0) {
+			yield return null;
+			ignoreInputMillisRemaining -= Time.deltaTime * 1000;
 		}
 	}
 
 	IEnumerator Slide(float millis = 600) {
-		slideYieldMillisRemaining = millis;
 		//TODO: animation jump up
 		isSliding = true;
 		rigidBody2d.MoveRotation(-60);
-		velocity *= 1.2f;
-		while (slideYieldMillisRemaining > 0) {
-			yield return new WaitForSeconds (.3f);
-			slideYieldMillisRemaining -= Time.deltaTime * 1000;
+		velocity *= 1.1f;
+		ignoreInputMillisRemaining = millis;
+		while (ignoreInputMillisRemaining > 0) {
+			yield return null;
+			ignoreInputMillisRemaining -= Time.deltaTime * 1000;
 		}
 	}
 }
