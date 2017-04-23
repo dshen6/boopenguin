@@ -50,4 +50,8 @@ public class PlayerInput : MonoBehaviour {
 			BroadcastMessage ("Fire1Down");
 		}
 	}
+
+	public bool isAiming() {
+		return aimVector.sqrMagnitude > .1f;
+	}
 }

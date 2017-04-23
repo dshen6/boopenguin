@@ -25,6 +25,9 @@ public class PlayerController : MonoBehaviour {
 
 	void Update () {
 		if (ignoreInputMillisRemaining <= 0) {
+			if (playerInput.isAiming()) {
+				stopSliding();
+			}
 			velocity += (isSliding ? slideSpeed : walkSpeed) * playerInput.aimVector; 
 			velocity = Vector2.ClampMagnitude (velocity, isSliding ? maxSlideSpeed : maxWalkSpeed);
 		}
@@ -35,15 +38,15 @@ public class PlayerController : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other) {
 		velocity *= -.3f;
-		StartCoroutine(IgnoreInputForDuration ());
+		StartCoroutine(IgnoreInputForDuration());
 	}
 		
 	public void Fire1Down() {
-		StartCoroutine(Slide ());
+		StartCoroutine(Slide());
 	}
 		
 	IEnumerator IgnoreInputForDuration(float millis = 300) {
-		ignoreInputMillisRemaining = millis;
+		ignoreInputMillisRemaining = Mathf.Max(ignoreInputMillisRemaining, millis);
 		while (ignoreInputMillisRemaining > 0) {
 			yield return null;
 			ignoreInputMillisRemaining -= Time.deltaTime * 1000;
@@ -51,14 +54,28 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	IEnumerator Slide(float millis = 600) {
-		//TODO: animation jump up
-		isSliding = true;
-		rigidBody2d.MoveRotation(-60);
-		velocity *= 1.1f;
-		ignoreInputMillisRemaining = millis;
+		startSliding ();
+		ignoreInputMillisRemaining = Mathf.Max(ignoreInputMillisRemaining, millis);
 		while (ignoreInputMillisRemaining > 0) {
 			yield return null;
 			ignoreInputMillisRemaining -= Time.deltaTime * 1000;
 		}
 	}
+
+	private void startSliding (){
+		if (isSliding) {
+			return;
+		}
+		isSliding = true;
+		rigidBody2d.MoveRotation(-60);
+		velocity *= 1.1f;
+	}
+
+	private void stopSliding () {
+		if (isSliding) {
+			isSliding = false;
+			rigidBody2d.MoveRotation (0);
+		}
+	}
+
 }
