@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
 
 	public delegate void PenguinFallAction();
+
 	public static event PenguinFallAction OnPenguinFall;
 
 	private Animator animator;
@@ -23,31 +24,32 @@ public class PlayerController : MonoBehaviour {
 	private float ignoreInputMillisRemaining;
 	private float slideDurationMillisRemaining;
 	private float fallDurationMillis;
+	private AudioSource audioSource;
 
 	protected PlayerInput playerInput;
 	protected Rigidbody2D rigidBody2d;
 
 	public GameObject splashPrefab;
 
- 	private Vector3 UP = new Vector3(0,0,-1);
-	private Vector3 DOWN = new Vector3(0,0,1);
+	private Vector3 UP = new Vector3(0, 0, -1);
+	private Vector3 DOWN = new Vector3(0, 0, 1);
 
-	void Start () {
+	void Start() {
 		playerInput = GetComponent<PlayerInput>();
 		rigidBody2d = GetComponent<Rigidbody2D>();
-		animator = GetComponentInChildren<Animator> ();
+		animator = GetComponentInChildren<Animator>();
+		audioSource = GetComponent<AudioSource>();
 	}
 
-	void OnSplash () {
-		Debug.Log("HELLO SPLASHY");
+	void OnSplash() {
 		GameObject splash = Instantiate(splashPrefab) as GameObject;
 		splash.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, 0);
 	}
 
-	void Update () {
+	void Update() {
 		// Check to see if we're falling
 		RaycastHit hit;
-		Physics.Raycast (gameObject.transform.position + UP, DOWN, out hit);
+		Physics.Raycast(gameObject.transform.position + UP, DOWN, out hit);
 		if (hit.collider == null || !hit.collider.name.Equals("Iceberg")) {
 			if (fallDurationMillis == 0) {
 				if (OnPenguinFall != null) {
@@ -84,15 +86,15 @@ public class PlayerController : MonoBehaviour {
 				stopSliding();
 			}
 			velocity += (isSliding ? slideSpeed : walkSpeed) * playerInput.aimVector; 
-			velocity = Vector2.ClampMagnitude (velocity, isSliding ? maxSlideSpeed : maxWalkSpeed);
+			velocity = Vector2.ClampMagnitude(velocity, isSliding ? maxSlideSpeed : maxWalkSpeed);
 		}
 		velocity *= isSliding ? slideFriction : friction;
 
 		rigidBody2d.MovePosition(rigidBody2d.position + velocity * Time.fixedDeltaTime);
 
-		AnimationHelper.UpdateAnimator (animator, velocity.magnitude, velocity.normalized);
+		AnimationHelper.UpdateAnimator(animator, velocity.magnitude, velocity.normalized);
 	}
-		
+
 	void OnTriggerEnter2D(Collider2D other) {
 		if (other.CompareTag("Player")) {
 			HandlePlayerTriggerEnter(other);
@@ -115,18 +117,19 @@ public class PlayerController : MonoBehaviour {
 			return;
 		}
 
-		RaycastHit2D impact = Physics2D.Raycast (rigidBody2d.position, towardsOther);
-		velocity = Vector2.Reflect (velocity, impact.normal);
+		RaycastHit2D impact = Physics2D.Raycast(rigidBody2d.position, towardsOther);
+		velocity = Vector2.Reflect(velocity, impact.normal);
 
 		float adjustedVelocityMagnitude = otherPlayer.velocity.magnitude * impulseFactor;
 		adjustedVelocityMagnitude = Mathf.Max(adjustedVelocityMagnitude, .5f);
 		velocity = velocity.normalized * adjustedVelocityMagnitude;
 	}
-		
+
 	public void Fire1Down() {
+		playRandomizedAudio();
 		StartCoroutine(Slide());
 	}
-		
+
 	IEnumerator IgnoreInputForDuration(float millis = 300) {
 		ignoreInputMillisRemaining = Mathf.Max(ignoreInputMillisRemaining, millis);
 		while (ignoreInputMillisRemaining > 0) {
@@ -136,7 +139,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	IEnumerator Slide(float millis = 600) {
-		startSliding ();
+		startSliding();
 		slideDurationMillisRemaining = millis;
 		while (slideDurationMillisRemaining > 0) {
 			yield return null;
@@ -144,20 +147,24 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	private void startSliding () {
+	private void startSliding() {
 		if (isSliding) {
 			return;
 		}
 		isSliding = true;
-		animator.SetBool ("Sliding", true);
+		animator.SetBool("Sliding", true);
 		velocity *= 1.1f;
 	}
 
-	private void stopSliding () {
+	private void stopSliding() {
 		if (isSliding) {
-			animator.SetBool ("Sliding", false);
+			animator.SetBool("Sliding", false);
 			isSliding = false;
 		}
 	}
 
+	private void playRandomizedAudio() {
+		audioSource.pitch *= Mathf.Pow(1.05946f, Random.Range(-7, 7));
+		audioSource.Play();
+	}
 }
