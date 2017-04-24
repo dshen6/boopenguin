@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+	public delegate void PenguinFallAction();
+	public static event PenguinFallAction OnPenguinFall;
+
 	private Animator animator;
 
 	public int PLAYER_ID = 1;
@@ -39,6 +42,9 @@ public class PlayerController : MonoBehaviour {
 		Physics.Raycast (gameObject.transform.position + UP, DOWN, out hit);
 		if (hit.collider == null || !hit.collider.name.Equals("Iceberg")) {
 			if (fallDurationMillis == 0) {
+				if (OnPenguinFall != null) {
+					OnPenguinFall();
+				}
 				Debug.Log("just fell");
 			}
 

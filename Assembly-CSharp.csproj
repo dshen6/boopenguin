@@ -49,8 +49,10 @@
      <Compile Include="Assets\AnimationHelper.cs" />
      <Compile Include="Assets\ControlsGuiController.cs" />
      <Compile Include="Assets\EnvironmentTilter.cs" />
+     <Compile Include="Assets\NewBehaviourScript.cs" />
      <Compile Include="Assets\PlayerController.cs" />
      <Compile Include="Assets\PlayerInput.cs" />
+     <Compile Include="Assets\ScoreController.cs" />
      <None Include="Assets\Standard Assets\Effects\ToonShading\Shaders\ToonBasic.shader" />
      <None Include="Assets\Standard Assets\Effects\Projectors\Guidelines.txt" />
      <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
