@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
 	public float maxSlideSpeed;
 	public float walkSpeed;
 	public float slideSpeed;
+	public float slideBoost;
 	public float gravity;
 	public float friction = .94f;
 	public float slideFriction = .98f;
@@ -102,27 +103,48 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void HandlePlayerTriggerEnter(Collider2D other) {
-		StartCoroutine(IgnoreInputForDuration());
-
-		// look how fast they're going, attempt to conserve momentum using m1 * v1 = m2 * v2; 
-
-		PlayerController otherPlayer = other.GetComponent<PlayerController>();
-		float otherMass = otherPlayer.isSliding ? 3 : 1;
-		float myMass = isSliding ? 3 : 1;
-		float impulseFactor = otherMass / myMass;
-
-		Vector2 towardsOther = other.attachedRigidbody.position - rigidBody2d.position;
-		if (velocity.sqrMagnitude < 1f) { // if small magnitude, just hack it
-			velocity = -towardsOther.normalized * .5f * impulseFactor;
+		if (PLAYER_ID != 1) {
 			return;
 		}
 
-		RaycastHit2D impact = Physics2D.Raycast(rigidBody2d.position, towardsOther);
-		velocity = Vector2.Reflect(velocity, impact.normal);
+		Debug.Log("collide");
 
-		float adjustedVelocityMagnitude = otherPlayer.velocity.magnitude * impulseFactor;
-		adjustedVelocityMagnitude = Mathf.Max(adjustedVelocityMagnitude, .5f);
-		velocity = velocity.normalized * adjustedVelocityMagnitude;
+		PlayerController otherPlayer = other.GetComponent<PlayerController>();
+		Vector2 otherVelocity = otherPlayer.velocity;
+		Rigidbody2D otherRigidbody2d = otherPlayer.rigidBody2d;
+
+		Vector2 myVelocity = velocity;
+		Rigidbody2D myRigidbody2d = rigidBody2d;
+
+		Vector2 myTowards = (otherRigidbody2d.position - myRigidbody2d.position).normalized;
+		Vector2 otherTowards = (myRigidbody2d.position - otherRigidbody2d.position).normalized;;
+
+		Vector2 otherTowardsVelocity = otherTowards * Vector2.Dot(otherVelocity, otherTowards);
+		Vector2 otherAwayVelocity = otherVelocity - otherTowardsVelocity;
+
+		Vector2 myTowardsVelocity = myTowards * Vector2.Dot(myVelocity, myTowards);
+		Vector2 myAwayVelocity = myVelocity - myTowardsVelocity;
+
+		otherPlayer.velocity = otherAwayVelocity + myTowardsVelocity;
+		velocity = myAwayVelocity + otherTowardsVelocity;
+
+		if (isSliding) {
+			StartCoroutine(IgnoreInputForDuration(300));
+		} else {
+			StartCoroutine(IgnoreInputForDuration(150));
+		}
+
+		if (otherPlayer.isSliding) {
+			StartCoroutine(otherPlayer.IgnoreInputForDuration(300));
+		} else {
+			StartCoroutine(otherPlayer.IgnoreInputForDuration(150));
+		}
+
+//		velocity = Vector2.Reflect(velocity, impact.normal);
+
+//		float adjustedVelocityMagnitude = otherPlayer.velocity.magnitude * impulseFactor;
+//		adjustedVelocityMagnitude = Mathf.Max(adjustedVelocityMagnitude, .5f);
+//		velocity = velocity.normalized * adjustedVelocityMagnitude;
 	}
 
 	public void Fire1Down() {
@@ -151,8 +173,12 @@ public class PlayerController : MonoBehaviour {
 		if (isSliding) {
 			return;
 		}
+		Debug.Log("sliding");
 		isSliding = true;
 		animator.SetBool("Sliding", true);
+		if (playerInput.isAiming()) {
+			velocity += slideBoost * playerInput.aimVector;
+		}
 		velocity *= 1.1f;
 	}
 
