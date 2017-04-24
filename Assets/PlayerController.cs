@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour {
 				velocity = Vector2.zero;
 				rigidBody2d.MovePosition(Vector2.zero);
 				gameObject.transform.position = Vector3.zero;
-
+				playAudio(true);
 				fallDurationMillis = 0;
 				return;
 			}
@@ -126,7 +126,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	public void Fire1Down() {
-		playRandomizedAudio();
+		playAudio(false);
 		StartCoroutine(Slide());
 	}
 
@@ -163,8 +163,13 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	private void playRandomizedAudio() {
-		audioSource.pitch *= Mathf.Pow(1.05946f, Random.Range(-7, 7));
+	private void playAudio(bool reset) {
+		if (reset) {
+			audioSource.pitch = 1;
+		} else {
+			audioSource.pitch *= Mathf.Pow(1.05946f, Random.Range(-7, 7));
+		}
 		audioSource.Play();
 	}
+
 }
