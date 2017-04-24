@@ -48,8 +48,8 @@
   <ItemGroup>
      <Compile Include="Assets\AnimationHelper.cs" />
      <Compile Include="Assets\ControlsGuiController.cs" />
+     <Compile Include="Assets\DeleteAfterAnimation.cs" />
      <Compile Include="Assets\EnvironmentTilter.cs" />
-     <Compile Include="Assets\NewBehaviourScript.cs" />
      <Compile Include="Assets\PlayerController.cs" />
      <Compile Include="Assets\PlayerInput.cs" />
      <Compile Include="Assets\ScoreController.cs" />

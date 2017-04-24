@@ -27,13 +27,21 @@ public class PlayerController : MonoBehaviour {
 	protected PlayerInput playerInput;
 	protected Rigidbody2D rigidBody2d;
 
-	private Vector3 UP = new Vector3(0,0,-1);
+	public GameObject splashPrefab;
+
+ 	private Vector3 UP = new Vector3(0,0,-1);
 	private Vector3 DOWN = new Vector3(0,0,1);
 
 	void Start () {
 		playerInput = GetComponent<PlayerInput>();
 		rigidBody2d = GetComponent<Rigidbody2D>();
 		animator = GetComponentInChildren<Animator> ();
+	}
+
+	void OnSplash () {
+		Debug.Log("HELLO SPLASHY");
+		GameObject splash = Instantiate(splashPrefab) as GameObject;
+		splash.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, 0);
 	}
 
 	void Update () {
@@ -45,6 +53,7 @@ public class PlayerController : MonoBehaviour {
 				if (OnPenguinFall != null) {
 					OnPenguinFall();
 				}
+				Invoke("OnSplash", 0.3f);
 				Debug.Log("just fell");
 			}
 
