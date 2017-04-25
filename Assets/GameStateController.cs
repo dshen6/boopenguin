@@ -5,11 +5,10 @@ using UnityEngine.UI;
 
 public class GameStateController : MonoBehaviour {
 
-
 	public Canvas canvas;
 	public GameObject playerPrefab;
-
 	public int numberPlayers = 2;
+	private bool inInitState = true;
 
 	void OnEnable() {
 		PlayerController.OnPlayerFall += PlayerFall;
@@ -24,9 +23,6 @@ public class GameStateController : MonoBehaviour {
 	}
 
 	void Start() {
-		for (int i = 1; i <= numberPlayers; i++) {
-			instantiatePlayer(i);
-		}
 	}
 
 	IEnumerator instantiatePlayerWithDelay(int playerId) {
@@ -39,6 +35,15 @@ public class GameStateController : MonoBehaviour {
 		player.GetComponent<PlayerController>().PLAYER_ID = playerId;
 		player.transform.position = positionForPlayerId(playerId);
 		canvas.GetComponentsInChildren<ControlsGuiController>()[playerId - 1].setPlayer(player);
+	}
+
+	void instantiateGameWithNumPlayers(int numPlayers) {
+		numberPlayers = numPlayers;
+		for (int i = 1; i <= numberPlayers; i++) {
+			instantiatePlayer(i);
+		}
+		inInitState = false;
+		canvas.GetComponentsInChildren<Text>()[4].transform.localPosition = new Vector3(2000, 0, 0); // lol gtfo
 	}
 
 	Vector3 positionForPlayerId(int playerId) {
@@ -80,6 +85,20 @@ public class GameStateController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update() {
-		
+		if (!inInitState) {
+			return;
+		}
+
+		if (Input.GetButtonDown("4_Keyboard")) {
+			instantiateGameWithNumPlayers(4);
+		}
+
+		if (Input.GetButtonDown("3_Keyboard")) {
+			instantiateGameWithNumPlayers(3);
+		}
+
+		if (Input.GetButtonDown("2_Keyboard")) {
+			instantiateGameWithNumPlayers(2);
+		}
 	}
 }
