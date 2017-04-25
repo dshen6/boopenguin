@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-	public delegate void PenguinFallAction();
+	public delegate void PlayerFallAction(int playerId);
 
-	public static event PenguinFallAction OnPenguinFall;
+	public static event PlayerFallAction OnPlayerFall;
 
 	private Animator animator;
 
@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour {
 
 	private Vector3 UP = new Vector3(0, 0, -1);
 	private Vector3 DOWN = new Vector3(0, 0, 1);
+	private bool shouldIgnoreNextTrigger;
 
 	void Start() {
 		playerInput = GetComponent<PlayerInput>();
@@ -53,8 +54,8 @@ public class PlayerController : MonoBehaviour {
 		Physics.Raycast(gameObject.transform.position + UP, DOWN, out hit);
 		if (hit.collider == null || !hit.collider.name.Equals("Iceberg")) {
 			if (fallDurationMillis == 0) {
-				if (OnPenguinFall != null) {
-					OnPenguinFall();
+				if (OnPlayerFall != null) {
+					OnPlayerFall(PLAYER_ID);
 				}
 				Invoke("OnSplash", 0.3f);
 				Debug.Log("just fell");
@@ -62,12 +63,13 @@ public class PlayerController : MonoBehaviour {
 
 			if (fallDurationMillis > 2f) {
 				Debug.Log("respawn");
-				zVelocity = 0;
-				velocity = Vector2.zero;
-				rigidBody2d.MovePosition(Vector2.zero);
-				gameObject.transform.position = Vector3.zero;
-				playAudio(true);
-				fallDurationMillis = 0;
+				Destroy(this);
+//				zVelocity = 0;
+//				velocity = Vector2.zero;
+//				rigidBody2d.MovePosition(Vector2.zero);
+//				gameObject.transform.position = Vector3.zero;
+//				playAudio(true);
+//				fallDurationMillis = 0;
 				return;
 			}
 
@@ -102,14 +104,21 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
+	void ignoreNextTrigger() {
+		shouldIgnoreNextTrigger = true;
+	}
+
 	void HandlePlayerTriggerEnter(Collider2D other) {
-		if (PLAYER_ID != 1) {
+		if (shouldIgnoreNextTrigger) {
+			shouldIgnoreNextTrigger = false;
 			return;
 		}
-
-		Debug.Log("collide");
-
 		PlayerController otherPlayer = other.GetComponent<PlayerController>();
+		if (otherPlayer == null || rigidBody2d == null) {
+			return;
+		}
+		otherPlayer.ignoreNextTrigger();
+			
 		Vector2 otherVelocity = otherPlayer.velocity;
 		Rigidbody2D otherRigidbody2d = otherPlayer.rigidBody2d;
 

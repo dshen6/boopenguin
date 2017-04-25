@@ -63,7 +63,9 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (A_INPUT) || Input.GetButtonDown (A_GAMEPAD)) {
-			BroadcastMessage ("Fire1Down");
+			if (controller != null) {
+				BroadcastMessage("Fire1Down");
+			}
 			pressedInputSet.Add(A_INPUT);
 		}
 	}
@@ -73,6 +75,9 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	public bool hasPressedAllButtons() {
+		if (pressedInputSet == null) {
+			return false;
+		}
 		return pressedInputSet.Count == 5;
 	}
 }

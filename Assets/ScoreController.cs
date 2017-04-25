@@ -10,14 +10,14 @@ public class ScoreController : MonoBehaviour {
 	private int score = 10;
 
 	void OnEnable() {
-		PlayerController.OnPenguinFall += PenguinFall;
+		PlayerController.OnPlayerFall += PlayerFall;
 	}
 
 	void OnDisable() {
-		PlayerController.OnPenguinFall -= PenguinFall;
+		PlayerController.OnPlayerFall -= PlayerFall;
 	}
 
-	void PenguinFall() {
+	void PlayerFall(int playerId) {
 		score--;
 	}
 	// Use this for initialization
