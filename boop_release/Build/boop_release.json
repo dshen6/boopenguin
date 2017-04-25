@@ -1,0 +1,9 @@
+{
+"TOTAL_MEMORY": 268435456,
+"dataUrl": "boop_release.data.unityweb",
+"asmCodeUrl": "boop_release.asm.code.unityweb",
+"asmMemoryUrl": "boop_release.asm.memory.unityweb",
+"asmFrameworkUrl": "boop_release.asm.framework.unityweb",
+"splashScreenStyle": "Dark",
+"backgroundColor": "#222C36"
+}
